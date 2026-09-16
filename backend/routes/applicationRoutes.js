@@ -1,0 +1,11 @@
+const router = require('express').Router();
+const controller = require('../controllers/applicationController');
+const { authenticate, authorize } = require('../middleware/authMiddleware');
+router.get('/schemes', controller.getSchemes);
+router.use(authenticate, authorize('applicant'));
+router.post('/', controller.createApplication);
+router.get('/my', controller.getMyApplications);
+router.get('/:id', controller.getApplication);
+router.put('/:id', controller.saveApplication);
+router.post('/:id/submit', controller.submitApplication);
+module.exports = router;
