@@ -1,4 +1,5 @@
 const db = require('../config/db');
+const { validateRegistrationCategory, getEmployment, saveRegistrationCategory } = require('../utils/registrationCategory');
 
 const applicationNumber = () => `SK-${new Date().getFullYear()}-${Date.now().toString().slice(-9)}${Math.floor(Math.random() * 90 + 10)}`;
 const safeDate = (value) => value || null;
@@ -72,7 +73,7 @@ const getApplication = async (req, res, next) => {
     if (!application) return res.status(404).json({ message: 'Application not found' });
     const [[profile]] = await db.execute(`SELECT p.*, u.full_name, u.email FROM applicants p
       JOIN users u ON u.user_id = p.user_id WHERE p.applicant_id = ?`, [application.applicant_id]);
-    const [[employment]] = await db.execute('SELECT * FROM employment_details WHERE application_id = ?', [application.id]);
+    const employment = await getEmployment(db, application.id);
     const [securityRows] = await db.execute(`SELECT security_name, is_entitled, remarks FROM application_social_security ass
       JOIN social_security_types sst ON sst.security_type_id = ass.security_type_id WHERE ass.application_id = ?`, [application.id]);
     const selection = { scheme_id: application.scheme_id, start_month: application.start_month, monthly_contribution: application.monthly_contribution, duration_months: application.duration_months };
@@ -93,6 +94,8 @@ const saveApplication = async (req, res, next) => {
     if (!application) return res.status(404).json({ message: 'Application not found' });
     if (!['DRAFT', 'RETURNED'].includes(application.status)) return res.status(409).json({ message: 'This application can no longer be edited' });
     const { profile = {}, employment = {}, socialSecurity = {}, selection = {}, family = [], beneficiaries = [] } = req.body;
+    const categoryError = validateRegistrationCategory(employment, false);
+    if (categoryError) return res.status(400).json({ message: categoryError });
     if (profile.full_name && !profile.nic) return res.status(400).json({ message: 'NIC number is required when saving applicant information' });
     await connection.beginTransaction();
     await connection.execute(`UPDATE users u JOIN applicants p ON p.user_id = u.user_id SET u.full_name = COALESCE(NULLIF(?, ''), u.full_name)
@@ -100,11 +103,12 @@ const saveApplication = async (req, res, next) => {
     const gender = ['MALE', 'FEMALE', 'OTHER'].includes(upper(profile.gender, 'OTHER')) ? upper(profile.gender, 'OTHER') : 'OTHER';
     await connection.execute(`UPDATE applicants SET nic = COALESCE(NULLIF(?, ''), nic), date_of_birth = COALESCE(?, date_of_birth), gender = ?,
       nationality = COALESCE(NULLIF(?, ''), nationality), permanent_address = COALESCE(?, permanent_address), contact_number = COALESCE(?, contact_number)
-      WHERE applicant_id = ?`, [profile.nic || '', safeDate(profile.date_of_birth), gender, profile.nationality || '', profile.permanent_address, profile.contact_number, application.applicant_id]);
+      WHERE applicant_id = ?`, [profile.nic || '', safeDate(profile.date_of_birth), gender, profile.nationality || '', profile.permanent_address ?? null, profile.contact_number ?? null, application.applicant_id]);
     await connection.execute(`INSERT INTO employment_details (application_id, service_years, service_months, is_sltda_registered, sltda_registration_no)
       VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE service_years=VALUES(service_years), service_months=VALUES(service_months),
       is_sltda_registered=VALUES(is_sltda_registered), sltda_registration_no=VALUES(sltda_registration_no)`,
     [application.id, Number(employment.service_years) || 0, Number(employment.service_months) || 0, bool(employment.sltda_registered), employment.sltda_registration_no || null]);
+    await saveRegistrationCategory(connection, application.id, employment);
     if (selection.scheme_id) await connection.execute(`UPDATE applications SET scheme_id = ?, start_month = COALESCE(?, start_month),
       monthly_contribution = COALESCE(?, monthly_contribution), duration_months = COALESCE(?, duration_months) WHERE application_id = ?`,
     [selection.scheme_id, safeDate(selection.start_month), selection.monthly_contribution || 0, selection.duration_months || 1, application.id]);
@@ -137,6 +141,8 @@ const submitApplication = async (req, res, next) => {
     const application = await findApplication(req.params.id, req.user.id);
     if (!application) return res.status(404).json({ message: 'Application not found' });
     if (!['DRAFT', 'RETURNED'].includes(application.status)) return res.status(409).json({ message: 'This application has already been submitted' });
+    const categoryError = validateRegistrationCategory(await getEmployment(db, application.id));
+    if (categoryError) return res.status(400).json({ message: categoryError });
     if (!application.nic || application.nic.startsWith('PENDING-')) return res.status(400).json({ message: 'Complete applicant information and NIC number before submitting' });
     await db.execute("UPDATE applications SET status = 'SUBMITTED', submitted_at = CURDATE() WHERE application_id = ?", [application.id]);
     res.json({ message: 'Application submitted successfully' });

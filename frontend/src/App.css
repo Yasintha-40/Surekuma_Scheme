@@ -1035,7 +1035,7 @@ footer button:hover{color:var(--c-700)}
   font-size:.75rem;font-weight:700;color:var(--t2);letter-spacing:.01em;
 }
 .auth-form input,.filter input,.filter select,.form-inner input,
-.field-grid input,.decision textarea,.decision select,.grid input{
+.field-grid input,.decision textarea,.decision select,.grid input,.registration-category select{
   padding:.88rem 1rem;
   border:1.5px solid var(--b2);
   border-radius:var(--r2);
@@ -1044,7 +1044,7 @@ footer button:hover{color:var(--c-700)}
   transition:border-color var(--tf),box-shadow var(--tf);
 }
 .auth-form input:focus,.filter input:focus,.form-inner input:focus,
-.field-grid input:focus,.decision textarea:focus{
+.field-grid input:focus,.decision textarea:focus,.registration-category select:focus,.registration-category input:focus{
   border-color:var(--c-400); box-shadow:var(--sg);
 }
 .auth-form textarea,.form-inner textarea,.decision textarea{
@@ -1879,6 +1879,8 @@ footer button:hover{color:var(--c-700)}
   font-weight:400;margin:0 0 1.4rem;
 }
 .grid,.field-grid{display:grid;grid-template-columns:1fr 1fr;gap:.95rem}
+.registration-category{display:grid;gap:.95rem;align-content:start;min-width:0}
+.registration-category select,.registration-category input{width:100%;min-width:0}
 .grid label,.field-grid label,.scheme-select{
   display:grid;gap:.42rem;
   font-size:.74rem;font-weight:700;color:var(--t2);

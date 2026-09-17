@@ -1,4 +1,5 @@
 const db = require('../config/db');
+const { getEmployment } = require('../utils/registrationCategory');
 
 const statusForDatabase = (value) => ({
   draft: 'DRAFT', submitted: 'SUBMITTED', under_review: 'UNDER_REVIEW',
@@ -47,7 +48,7 @@ const getDetails = async (req, res, next) => {
     const application = await applicationDetails(req.params.id);
     if (!application) return res.status(404).json({ message: 'Application not found' });
     const [[profile]] = await db.execute(`SELECT p.*, u.full_name, u.email FROM applicants p JOIN users u ON u.user_id = p.user_id WHERE p.applicant_id = ?`, [application.applicant_id]);
-    const [[employment]] = await db.execute('SELECT * FROM employment_details WHERE application_id = ?', [application.id]);
+    const employment = await getEmployment(db, application.id);
     const [socialSecurity] = await db.execute(`SELECT sst.security_name, ass.is_entitled, ass.remarks
       FROM application_social_security ass JOIN social_security_types sst ON sst.security_type_id = ass.security_type_id WHERE ass.application_id = ?`, [application.id]);
     const [[selection]] = await db.execute(`SELECT a.scheme_id, a.start_month, a.monthly_contribution, a.duration_months, ps.scheme_name

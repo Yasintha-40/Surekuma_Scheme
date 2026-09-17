@@ -249,23 +249,91 @@ const Icons = {
 };
 
 function Auth({ mode, go, onLogin }) {
-  const [form,setForm] = useState({full_name:'',email:'',password:''});
-  const [note,setNote]=useState('');
-  const [loading,setLoading]=useState(false);
+  const [form, setForm] = useState({ full_name: '', email: '', otp: '' });
+  const [sent, setSent] = useState(false);
+  const [note, setNote] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [retryAt, setRetryAt] = useState(0);
+  const [now, setNow] = useState(() => Date.now());
   const admin = mode === 'admin-login';
-  const submit = async e => { e.preventDefault(); setLoading(true); setNote(''); try { if (mode === 'register') { await api.post('/auth/register',form); setNote('Account created. Please sign in.'); go('login'); } else { const {data}=await api.post('/auth/login',{email:form.email,password:form.password}); if(admin && data.user.role !== 'admin') throw new Error('This account does not have administrator access'); localStorage.setItem('surekuma_token',data.token); localStorage.setItem('surekuma_user',JSON.stringify(data.user)); onLogin(data.user); } } catch(e) { setNote(e.response?.data?.message || e.message) } finally { setLoading(false) } };
+  const register = mode === 'register';
+  const remaining = Math.max(0, Math.ceil((retryAt - now) / 1000));
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+  const cooldown = seconds => {
+    setNow(Date.now());
+    setRetryAt(Date.now() + seconds * 1000);
+  };
+  const showError = error => {
+    setNote(error.response?.data?.message || error.message);
+    if (error.response?.data?.retryAfter) cooldown(error.response.data.retryAfter);
+  };
+  const sendCode = async () => {
+    const { data } = await api.post('/auth/send-otp', { email: form.email });
+    setSent(true);
+    setForm(previous => ({ ...previous, otp: '' }));
+    cooldown(data.retryAfter || 60);
+    setNote(data.message);
+  };
+  const resend = async () => {
+    setLoading(true);
+    setNote('');
+    try { await sendCode(); } catch (error) { showError(error); }
+    finally { setLoading(false); }
+  };
+  const submit = async event => {
+    event.preventDefault();
+    setLoading(true);
+    setNote('');
+    try {
+      if (register) {
+        await api.post('/auth/register', { full_name: form.full_name, email: form.email });
+        setNote('Account created. Select Sign in to request your email verification code.');
+      } else if (!sent) {
+        await sendCode();
+      } else {
+        const { data } = await api.post('/auth/verify-otp', { email: form.email, otp: form.otp });
+        if (admin && data.user.role !== 'admin') throw new Error('This account does not have administrator access. Please use member sign in.');
+        localStorage.setItem('surekuma_token', data.token);
+        localStorage.setItem('surekuma_user', JSON.stringify(data.user));
+        onLogin(data.user);
+      }
+    } catch (error) { showError(error); }
+    finally { setLoading(false); }
+  };
   return <main className={`auth auth-${mode}`}>
     <section className="auth-story">
       <div className="auth-story-image" aria-hidden="true"></div>
       <button className="brand inverse" onClick={() => go('home')} aria-label="Go to Surekuma home"><b>S</b><span>SUREKUMA<small>MEMBER PORTAL</small></span></button>
-      <div className="auth-story-photo" aria-hidden="true">
-        <img src="/beach_bg.jpg" alt="" />
-      </div>
+      <div className="auth-story-photo" aria-hidden="true"><img src="/beach_bg.jpg" alt="" /></div>
     </section>
-    <section className="auth-form"><button className="back" onClick={() => go('home')}>← Back to website</button><form onSubmit={submit}><p className="eyebrow">{admin ? 'ADMIN LOGIN' : mode === 'register' ? 'CREATE ACCOUNT' : 'WELCOME BACK'}</p><h2>{admin ? 'Administrator sign in' : mode === 'register' ? 'Start your application' : 'Sign in to Surekuma'}</h2>{mode === 'register' && <label>Full name<input required value={form.full_name} onChange={e=>setForm({...form,full_name:e.target.value})}/></label>}<label>Email address<input type="email" required value={form.email} onChange={e=>setForm({...form,email:e.target.value})}/></label><label>Password<input type="password" required minLength="8" value={form.password} onChange={e=>setForm({...form,password:e.target.value})}/></label>{note && <p className="notice">{note}</p>}<button className="primary" disabled={loading}>{loading?'Please wait': mode==='register'?'Create account →':'Sign in →'}</button>{!admin && <p>{mode==='register'?'Already registered?':'New to Surekuma?'} <button className="text" type="button" onClick={()=>go(mode==='register'?'login':'register')}>{mode==='register'?'Sign in':'Create an account'}</button></p>}<button className="text admin-link" type="button" onClick={()=>go('admin-login')}>Administrator access →</button></form></section>
+    <section className="auth-form">
+      <button className="back" onClick={() => go('home')}>← Back to website</button>
+      <form onSubmit={submit}>
+        <p className="eyebrow">{admin ? 'ADMIN LOGIN' : register ? 'CREATE ACCOUNT' : 'WELCOME BACK'}</p>
+        <h2>{admin ? 'Administrator sign in' : register ? 'Start your application' : 'Sign in to Surekuma'}</h2>
+        {register && <label>Full name<input autoComplete="name" required maxLength={150} value={form.full_name} onChange={e => setForm({ ...form, full_name: e.target.value })} /></label>}
+        <label>Email address<input type="email" autoComplete="email" required maxLength={150} readOnly={sent || loading} value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} /></label>
+        {sent && <>
+          <p>Enter the verification code sent to {form.email}. The code expires in 5 minutes.</p>
+          <label>Verification code<input type="text" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" maxLength={6} required placeholder="6-digit code" value={form.otp} onChange={e => setForm({ ...form, otp: e.target.value.replace(/\D/g, '').slice(0, 6) })} /></label>
+        </>}
+        {note && <p className="notice" role="status" aria-live="polite">{note}</p>}
+        <button className="primary" disabled={loading || (!sent && !register && remaining > 0)}>
+          {loading ? 'Please wait…' : register ? 'Create account →' : sent ? 'Verify OTP →' : remaining > 0 ? `Try again in ${remaining}s` : 'Send OTP →'}
+        </button>
+        {sent && <>
+          <button className="text" type="button" disabled={loading || remaining > 0} onClick={resend}>{remaining > 0 ? `Resend OTP in ${remaining}s` : 'Resend OTP'}</button>
+          <button className="text" type="button" disabled={loading} onClick={() => { setSent(false); setForm({ ...form, otp: '' }); setNote(''); }}>Change email address</button>
+        </>}
+        {!admin && <p>{register ? 'Already registered?' : 'New to Surekuma?'} <button className="text" type="button" disabled={loading} onClick={() => go(register ? 'login' : 'register')}>{register ? 'Sign in' : 'Create an account'}</button></p>}
+        <button className="text admin-link" type="button" disabled={loading} onClick={() => go(admin ? 'login' : 'admin-login')}>{admin ? 'Member sign in →' : 'Administrator access →'}</button>
+      </form>
+    </section>
   </main>
 }
-
 const applicantLinks = [
   ['dashboard', Icons.Grid, 'Overview'],
   ['application', Icons.Scan, 'Application form'],
@@ -615,6 +683,8 @@ function AppList({ apps, select }) {
   );
 }
 
+const registrationCategories = ['Homestay', 'Bungalow', 'Tourist Hotels', 'Rented Apartment', 'Tourist Guide Lecturers', 'Travel Agents', 'Tourist Driver', 'Other Category'];
+
 function ApplicationForm({ appId, onCreated, go }) {
   const [id, setId] = useState(appId);
   const [form, setForm] = useState({ profile: {}, employment: {}, socialSecurity: {}, selection: {}, family: [{}], beneficiaries: [{}] });
@@ -663,25 +733,47 @@ function ApplicationForm({ appId, onCreated, go }) {
   }, [id]);
 
   const field = (group, key, value) => setForm({ ...form, [group]: { ...form[group], [key]: value } });
+  const validateCategory = (required = true) => {
+    const { registrationCategory, otherRegistrationCategory } = form.employment || {};
+    let error = '';
+    if (!registrationCategory && required) error = 'Please select your registration category.';
+    else if (registrationCategory && !registrationCategories.includes(registrationCategory)) error = 'Please select a valid registration category.';
+    else if (registrationCategory === 'Other Category' && !otherRegistrationCategory?.trim()) error = 'Please specify your category.';
+    else if (registrationCategory === 'Other Category' && otherRegistrationCategory.trim().length > 150) error = 'Your category must be 150 characters or fewer.';
+    if (error) { setNote(error); setStep(2); return false; }
+    return true;
+  };
   const save = async () => {
+    if (!validateCategory(false)) return null;
     try {
       let current = id;
       if (!current) {
         const { data } = await api.post('/applications');
         current = data.application.id;
-        setId(current);
-        onCreated(current);
       }
-      await api.put(`/applications/${current}`, form);
+      await api.put(`/applications/${current}`, {
+        ...form,
+        employment: {
+          ...form.employment,
+          registrationCategory: form.employment?.registrationCategory || null,
+          otherRegistrationCategory: form.employment?.registrationCategory === 'Other Category'
+            ? form.employment.otherRegistrationCategory.trim() : null,
+        },
+      });
+      if (!id) { setId(current); onCreated(current); }
       setNote('Draft saved successfully.');
+      return current;
     } catch (e) {
       setNote(message(e));
+      return null;
     }
   };
   const submit = async () => {
-    await save();
+    if (!validateCategory()) return;
+    const current = await save();
+    if (!current) return;
     try {
-      await api.post(`/applications/${id}/submit`);
+      await api.post(`/applications/${current}/submit`);
       setNote('Application submitted successfully.');
       go('status');
     } catch (e) {
@@ -698,7 +790,7 @@ function ApplicationForm({ appId, onCreated, go }) {
 
   const personal = (
     <div className="grid">
-      {[['full_name','Full name'],['nic','NIC number'],['date_of_birth','Date of birth'],['age','Age'],['gender','Gender'],['nationality','Nationality'],['permanent_address','Permanent address'],['contact_number','Contact number'],['email','Email address']].map(([k,n]) => (
+      {[['full_name','Full name (as per NIC)'],['nic','NIC number'],['date_of_birth','Date of birth'],['age','Age'],['gender','Gender'],['nationality','Nationality'],['permanent_address','Permanent address'],['contact_number','Contact number'],['email','Email address']].map(([k,n]) => (
         <label key={k}>
           {n}
           <input
@@ -714,7 +806,7 @@ function ApplicationForm({ appId, onCreated, go }) {
   const employment = (
     <>
       <div className="grid">
-        {[['service_years','Service years'],['service_months','Service months'],['sltda_registration_no','SLTDA registration number'],['registration_category','Registration category']].map(([k,n]) => (
+        {[['service_years','Service years'],['service_months','Service months'],['sltda_registration_no','SLTDA registration number']].map(([k,n]) => (
           <label key={k}>
             {n}
             <input
@@ -723,6 +815,29 @@ function ApplicationForm({ appId, onCreated, go }) {
             />
           </label>
         ))}
+        <div className="registration-category">
+          <label>
+            Registration Category
+            <select required value={form.employment?.registrationCategory || ''}
+              onChange={e => {
+                const registrationCategory = e.target.value;
+                setForm(previous => ({ ...previous, employment: {
+                  ...previous.employment, registrationCategory, otherRegistrationCategory: null,
+                } }));
+                setNote('');
+              }}>
+              <option value="">Select your registration category</option>
+              {registrationCategories.map(category => <option key={category} value={category}>{category}</option>)}
+            </select>
+          </label>
+          {form.employment?.registrationCategory === 'Other Category' && (
+            <label>
+              Please specify your category
+              <input required maxLength={150} value={form.employment.otherRegistrationCategory || ''}
+                onChange={e => field('employment', 'otherRegistrationCategory', e.target.value)} />
+            </label>
+          )}
+        </div>
       </div>
       <div className="checks">
         {[['epf','EPF'],['etf','ETF'],['government_pension','Government pension'],['other_social_security','Other social security']].map(([k,n]) => (
@@ -818,7 +933,7 @@ function ApplicationForm({ appId, onCreated, go }) {
           <div>
             {step > 1 && <button className="text" onClick={() => setStep(step - 1)}>Back</button>}
             {step < 4 ? (
-              <button className="hero-search-btn" onClick={() => setStep(step + 1)}>Continue {'>'}</button>
+              <button className="hero-search-btn" onClick={() => { if (step !== 2 || validateCategory()) { setNote(''); setStep(step + 1); } }}>Continue {'>'}</button>
             ) : (
               <button className="hero-search-btn" onClick={submit}>Submit application {'>'}</button>
             )}
@@ -1303,5 +1418,5 @@ function Applications({ data, open, note }) {
 function AdminRows({data,open}){return data.length?<div className="rows admin-rows">{data.map(x=><article key={x.id}><div><strong>{x.full_name||'Incomplete draft'}</strong><p>{x.application_no} . {x.email||'No email provided'}</p></div><span>{x.scheme_name||'No scheme selected'}</span><Status value={x.status}/><button className="text" onClick={()=>open(x.id)}>Review {'>'}</button></article>)}</div>:<Empty text="No applications found."/>}
 function Review({data,back,done}){const [action,setAction]=useState('approved');const [comment,setComment]=useState('');const [note,setNote]=useState('');if(!data)return <section className="content"><Empty text="Select an application to review."/></section>;const save=async()=>{try{await api.post(`/admin/applications/${data.application.id}/review`,{action,comment});setNote('Review saved and applicant notified.');setTimeout(done,500)}catch(e){setNote(message(e))}};const blocks=[['Applicant information',data.profile],['Employment details',data.employment],['Social security',data.socialSecurity],['Pension scheme',data.selection]];return <section className="content"><button className="text" onClick={back}> Back to applications</button><Intro eyebrow="APPLICATION REVIEW" title={data.application.application_no} text={`${data.profile?.full_name||'Applicant'} . ${data.profile?.email||''}`}/><div className="review-grid"><div>{blocks.map(([heading,obj])=><section className="panel detail" key={heading}><h3>{heading}</h3>{obj?Object.entries(obj).filter(([k])=>!['id','application_id','scheme_id'].includes(k)).map(([k,v])=><p key={k}><b>{label(k)}</b><span>{String(v??'--')}</span></p>):<p>No information saved.</p>}</section>)}<section className="panel detail"><h3>Uploaded documents</h3>{data.documents.length?data.documents.map(d=><p key={d.id}><b>{d.document_type}</b><a href={`http://localhost:5000${d.file_path}`} target="_blank">{d.file_name}</a></p>):<p>No documents uploaded.</p>}</section></div><section className="panel decision"><h3>Review decision</h3><label>Decision<select value={action} onChange={e=>setAction(e.target.value)}><option value="approved">Approve</option><option value="correction_required">Request correction</option><option value="rejected">Reject</option></select></label><label>Response comment<textarea value={comment} onChange={e=>setComment(e.target.value)} placeholder="Explain the decision or requested correction"/></label>{note&&<p className="notice">{note}</p>}<button className="primary" onClick={save}>Save review & notify applicant</button><h3>Review history</h3>{data.reviews.length?data.reviews.map(x=><p key={x.id}><Status value={x.action}/> {x.comment}</p>):<p>No previous reviews.</p>}</section></div></section>}
 
-function App(){const [page,setPage]=useState('home');const [user,setUser]=useState(()=>{try{return JSON.parse(localStorage.getItem('surekuma_user'))}catch{return null}});const go=next=>setPage(next);const logout=()=>{localStorage.clear();setUser(null);go('home')};const login=u=>{setUser(u);go(u.role==='admin'?'admin-dashboard':'dashboard')};if(['login','register','admin-login'].includes(page))return <Auth mode={page} go={go} onLogin={login}/>;if(user)return <Shell user={user} page={page} go={go} logout={logout}>{user.role==='admin'?<Admin page={page} go={go}/>:<Applicant user={user} page={page} go={go}/>}</Shell>;return <><PublicNav go={go}/><Public page={page} go={go}/><footer> 2026 Surekuma Social Security Fund</footer></>}
+function App(){const [page,setPage]=useState('home');const [user,setUser]=useState(()=>{try{return JSON.parse(localStorage.getItem('surekuma_user'))}catch{return null}});const go=next=>setPage(next);const logout=()=>{localStorage.clear();setUser(null);go('home')};const login=u=>{setUser(u);go(u.role==='admin'?'admin-dashboard':'dashboard')};if(['login','register','admin-login'].includes(page))return <Auth key={page} mode={page} go={go} onLogin={login}/>;if(user)return <Shell user={user} page={page} go={go} logout={logout}>{user.role==='admin'?<Admin page={page} go={go}/>:<Applicant user={user} page={page} go={go}/>}</Shell>;return <><PublicNav go={go}/><Public page={page} go={go}/><footer> 2026 Surekuma Social Security Fund</footer></>}
 export default App
