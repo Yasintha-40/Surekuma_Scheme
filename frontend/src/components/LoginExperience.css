@@ -1,0 +1,148 @@
+/* Sign-in styles stay scoped to preserve the homepage and authenticated portals. */
+.entry.entry-is-login {
+  --font-sans: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  --font-display: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  --entry-ink: #142d3d;
+  font-family: var(--font-sans);
+  background: #f4f7f8;
+  color: var(--entry-ink);
+  padding-inline: clamp(20px, 4vw, 76px);
+}
+.entry-is-login .entry-header { padding-block: 22px; border-color: #dce4e7; }
+.entry-is-login .entry-brand { color: #142d3d; }
+.entry-is-login .entry-brand strong { font-family: var(--font-sans); font-size: 26px; font-weight: 800; letter-spacing: -.06em; }
+.entry-is-login .entry-brand-dot { color: #168477; }
+.entry-is-login .entry-brand small { color: #556b75; font-size: 8px; }
+.entry-is-login .entry-nav-button { color: #284551; border-color: #cddadd; font-size: 13px; background: #fff; min-height: 44px; }
+.entry-is-login .entry-login-stage { max-width: 1400px; grid-template-columns: 1.06fr 1fr; gap: 0; margin-block: 32px; padding: 0; flex: 0 0 auto; border-radius: 28px; background: #fff; border: 1px solid #e0e8eb; box-shadow: 0 20px 65px #233b4810; overflow: hidden; }
+.entry-is-login .entry-photograph-login { min-height: 660px; height: 100%; border-radius: 0; box-shadow: none; }
+.entry-is-login .entry-photograph-login .entry-photo { object-position: center 60%; transform: translate3d(var(--photo-x), var(--photo-y), 0) scale(1.09); transition: transform .4s ease-out; }
+.entry-is-login .entry-photograph-login .entry-photo-shade { background: linear-gradient(180deg, #061c2870, #06202d18 65%, #06202da6), linear-gradient(90deg,#061c2855,transparent); }
+.login-photo-label { position: absolute; top: 36px; left: 36px; display: flex; align-items: center; gap: 9px; border: 1px solid #ffffff55; background: #ffffff12; backdrop-filter: blur(12px); padding: 11px 14px; border-radius: 30px; font-size: 9px; letter-spacing: .12em; color: #fff; }
+.login-photo-label > span { width: 6px; height: 6px; background: #a9dfce; border-radius: 50%; }
+.login-photo-story { position: absolute; top: 120px; left: 40px; right: 25px; color: #fff; transform: translate3d(calc(var(--photo-x) * -.35), calc(var(--photo-y) * -.35),0); }
+.login-photo-story > p:first-child { font-size: 10px; letter-spacing: .18em; font-weight: 600; color: #d3e7e5; }
+.login-photo-story h2 { margin: 22px 0; color: #fff; font-family: var(--font-sans); font-size: clamp(42px,4.2vw,65px); line-height: 1.07; letter-spacing: -.055em; font-weight: 650; }
+.login-photo-story h2 span { color: #c6e8aa; }
+.login-photo-story > p:last-child { font-size: 14px; line-height: 1.8; color: #e9f2f0; }
+.login-photo-bottom { position: absolute; bottom: 25px; left: 36px; right: 30px; display: flex; justify-content: space-between; gap: 14px; color: white; font-size: 8px; letter-spacing: .08em; }
+.login-photo-bottom a { color: #e1edee; font-size: 9px; }
+.entry-is-login .entry-login-side { padding: clamp(28px,4vw,66px); align-self: stretch; background: #fff; border: 0; border-radius: 0; box-shadow: none; }
+.entry-is-login .entry-login-form { max-width: 470px; width: 100%; margin: auto; }
+.entry-is-login .entry-welcome-icon { width: 44px; height: 44px; background: #edf6f4; border: 1px solid #d5e8e2; border-radius: 13px; color: #16776c; margin-bottom: 22px; }
+.login-progress { display: flex; align-items: center; gap: 12px; font-size: 11px; color: #76868e; margin-bottom: 32px; }
+.login-progress .is-current { color: #16776c; font-weight: 650; }
+.login-progress i { width: 28px; height: 1px; background: #d7e3e4; }
+.entry-is-login .entry-login-form .entry-eyebrow { font-size: 10px; letter-spacing: .15em; color: #647983; font-weight: 650; margin-bottom: 12px; }
+.entry-is-login .entry-login-form h1 { font-family: var(--font-sans); font-size: clamp(32px,3vw,46px); font-weight: 700; letter-spacing: -.055em; line-height: 1.15; color: #142d3d; margin: 0 0 16px; }
+.login-heading-dot { color: #168477; }
+.entry-is-login .entry-login-form .entry-description { font-size: 14px; line-height: 1.75; color: #627480; margin-bottom: 28px; }
+.entry-is-login .entry-login-form label { font-size: 13px; color: #263f4c; }
+.entry-is-login .entry-email-wrap input { background: #f9fbfc; border: 1px solid #d7e1e5; border-radius: 10px; font: 15px var(--font-sans); min-height: 54px; }
+.entry-is-login .entry-email-wrap input:focus, .entry-is-login .entry-otp-input:focus { border-color: #188575; box-shadow: 0 0 0 4px #18857518; }
+.entry-is-login .entry-login-submit { background: #176f65; border: 1px solid #176f65; color: #fff; border-radius: 10px; font-size: 14px; font-weight: 600; min-height: 54px; box-shadow: 0 6px 15px #176f6515; }
+.entry-is-login .entry-login-submit:hover:not(:disabled) { background: #10594f; transform: translateY(-1px); }
+.entry-is-login .entry-login-help { font-size: 11px; line-height: 1.7; color: #647783; text-align: center; }
+.entry-is-login .entry-login-support { border-color: #e3eaed; margin-top: 25px; padding-top: 20px; }
+.entry-is-login .entry-login-support p { color: #344f5c; font-size: 12px; }
+.entry-is-login .entry-login-support p span { color: #677d86; }
+.entry-is-login .entry-login-signature { position: static; margin-top: 28px; text-align: center; font-size: 8px; color: #677d86; }
+.entry-is-login .entry-footnote { border-top: 1px solid #dce4e7; color: #607580; padding-block: 18px; font-size: 10px; }
+.entry-is-login button:focus-visible, .entry-is-login a:focus-visible { outline: 3px solid #168477; outline-offset: 4px; }
+.entry-is-login .entry-error, .entry-is-login .entry-notice { font-size: 13px; }
+@media (min-width: 1500px) { .entry-is-login .entry-login-stage { margin-block: 45px; } }
+@media (max-width: 900px) {
+  .entry-is-login .entry-login-stage { grid-template-columns: .85fr 1fr; }
+  .entry-is-login .entry-login-side { padding: 30px; }
+  .login-photo-story { left: 26px; }
+  .login-photo-label { left: 24px; font-size: 8px; }
+  .login-photo-bottom { left: 24px; flex-direction: column; }
+}
+@media (max-width: 680px) {
+  .entry-is-login .entry-header { padding-block: 18px; gap: 12px; }
+  .entry-is-login .entry-brand strong { font-size: 20px; }
+  .entry-is-login .entry-brand small { font-size: 6px; max-width: 170px; }
+  .entry-is-login .entry-nav-button { padding: 10px; min-width: 0; font-size: 11px; gap: 5px; }
+  .entry-is-login .entry-login-stage { grid-template-columns: 1fr; margin-block: 20px; border-radius: 20px; }
+  .entry-is-login .entry-login-side { grid-row: 1; padding: 28px 22px; align-items: stretch; }
+  .entry-is-login .entry-photograph-login { height: 290px; min-height: 290px; border-radius: 0; }
+  .login-photo-story { top: 35px; }
+  .login-photo-story h2 { font-size: 36px; margin: 10px 0; }
+  .login-photo-label, .login-photo-story > p:last-child { display: none; }
+  .login-photo-bottom { flex-direction: row; bottom: 20px; }
+  .login-progress { font-size: 10px; margin-bottom: 25px; }
+  .entry-is-login .entry-footnote { font-size: 9px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .entry-is-login .entry-photo, .login-photo-story { transform: none !important; transition: none; }
+  .entry-is-login .entry-login-stage { animation: none; }
+  .entry-is-login .entry-login-submit:hover:not(:disabled) { transform: none; }
+}
+
+/* Keep the page in the viewport; only the form can scroll on short screens
+   or when the keyboard / browser zoom reduces the available space. */
+.entry.entry-is-login {
+  height: 100dvh;
+  min-height: 0;
+  overflow: hidden;
+  box-sizing: border-box;
+  background: radial-gradient(ellipse at 8% 45%, #dcece6 0, transparent 55%), #f4f7f8;
+}
+.entry-is-login .entry-header { flex: 0 0 auto; padding-block: 14px; }
+.entry-is-login .entry-login-stage {
+  flex: 1 1 0;
+  min-height: 0;
+  margin-block: 18px;
+  width: 100%;
+  gap: clamp(20px, 3vw, 48px);
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  overflow: visible;
+}
+.entry-is-login .entry-photograph-login {
+  min-height: 0;
+  height: 100%;
+  border-radius: 28px;
+  border: 1px solid #ffffffa0;
+  box-shadow: 0 12px 32px #203e3618;
+  overflow: hidden;
+}
+.entry-is-login .entry-photograph-login .entry-photo { object-position: center; }
+.entry-is-login .entry-photograph-login .entry-photo-shade { background: linear-gradient(180deg, #09251e00, #09251e12); }
+.entry-is-login .entry-login-side {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  justify-content: flex-start;
+  padding: clamp(20px, 3vh, 38px) clamp(24px, 3.5vw, 56px);
+  background: #fff;
+  border: 1px solid #e0e8e6;
+  border-top: 3px solid #218778;
+  border-radius: 28px;
+  box-shadow: 0 12px 32px #203e3610;
+}
+.entry-is-login .entry-login-form { flex-shrink: 0; margin-block: auto; }
+.entry-is-login .entry-login-signature { flex-shrink: 0; margin-top: 16px; }
+.entry-is-login .entry-footnote { flex: 0 0 auto; padding-block: 10px; }
+@media (max-height: 800px) {
+  .entry-is-login .entry-welcome-icon { display: none; }
+  .entry-is-login .login-progress { margin-bottom: 18px; }
+  .entry-is-login .entry-login-form h1 { font-size: 32px; margin-bottom: 12px; }
+  .entry-is-login .entry-login-form .entry-description { margin-bottom: 18px; }
+  .entry-is-login .entry-login-support { margin-top: 15px; padding-top: 12px; }
+  .entry-is-login .entry-login-signature { display: none; }
+}
+@media (max-width: 680px) {
+  .entry-is-login .entry-login-stage { grid-template-rows: clamp(90px, 18dvh, 150px) minmax(0, 1fr); gap: 14px; }
+  .entry-is-login .entry-login-side { grid-row: 2; grid-column: 1; margin: 0; border-radius: 20px; padding: 20px 18px; }
+  .entry-is-login .entry-photograph-login { grid-row: 1; grid-column: 1; height: 100%; min-height: 0; border-radius: 20px; }
+  .entry-is-login .entry-photograph-login .entry-photo { object-position: center 35%; }
+  .entry-is-login .entry-footnote > span:last-child { display: none; }
+  .entry-is-login .entry-header { padding-block: 10px; }
+  .entry-is-login .entry-login-stage { margin-block: 12px; }
+}
+@media (max-width: 680px) and (max-height: 650px) {
+  .entry-is-login .entry-login-stage { grid-template-rows: 64px minmax(0, 1fr); gap: 10px; }
+}

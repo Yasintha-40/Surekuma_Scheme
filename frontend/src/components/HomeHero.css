@@ -1,0 +1,396 @@
+/* Coastal homepage: shared photograph behind the navigation and hero. */
+.entry.entry-is-home {
+  position: relative;
+  color: #fff;
+  padding-inline: 0;
+  background: #073b2d;
+  overflow-x: hidden;
+}
+
+.entry-is-home .entry-header {
+  padding: 30px max(24px, calc((100% - 1350px) / 2));
+  border: 0;
+  background: transparent;
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: 10;
+}
+.entry-is-home .entry-brand { color: #fff; gap: 18px; }
+.entry-is-home .entry-brand img { width: 36px; height: 52px; }
+.entry-is-home .entry-brand strong { font: 400 36px/1 Georgia, serif; letter-spacing: -1.5px; }
+.entry-is-home .entry-brand small { color: #fff; font: 400 14px/1.3 Georgia, serif; letter-spacing: 0; margin-top: 0; }
+
+.home-nav {
+  display: flex;
+  align-items: center;
+  gap: clamp(16px, 2.2vw, 34px);
+  margin-left: auto;
+}
+
+.home-nav button {
+  border: 0;
+  padding: 8px 0;
+  background: transparent;
+  color: rgba(255, 255, 255, .9);
+  font-size: 17px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color .2s;
+}
+
+.home-nav button:hover {
+  color: #f0ba4e;
+}
+
+/* Top Hero Section with Coastal Beach Background */
+.pension-hero-wrap {
+  width: 100%;
+  min-height: clamp(680px, 48.3vw, 800px);
+  display: grid;
+  align-items: center;
+  background: linear-gradient(90deg, rgba(0, 40, 29, .90), rgba(0, 35, 27, .48) 49%, rgba(0, 24, 18, .25)), url('/beach_bg.jpg') center / cover no-repeat;
+  padding: 160px 24px 110px;
+  position: relative;
+}
+.pension-welcome {
+  width: 100%;
+  max-width: 1020px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 55px;
+}
+
+.pension-welcome-copy {
+  min-width: 0;
+  animation: entry-reveal 0.75s both;
+}
+
+.pension-authority {
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
+  margin: 0 0 28px;
+  padding: 8px 18px;
+  border: 1px solid rgba(223, 162, 57, 0.4);
+  border-radius: 999px;
+  background: rgba(223, 162, 57, 0.09);
+  color: #dfa239;
+  font-size: clamp(10px, 0.85vw, 13px);
+  line-height: 1.4;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.pension-authority > span {
+  font-size: 14px;
+  color: #dfa239;
+}
+
+.entry-is-home .pension-welcome h1 {
+  color: #fff;
+  font-family: Georgia, serif;
+  font-size: clamp(36px, 3.1vw, 50px);
+  line-height: 1.05;
+  font-weight: 400;
+  letter-spacing: -0.04em;
+  margin: 0 0 22px;
+}
+
+.pension-welcome h1 > span,
+.pension-welcome h1 > em {
+  display: block;
+}
+
+.pension-welcome h1 > span:first-child {
+  font-size: clamp(64px, 6.5vw, 104px);
+  line-height: .98;
+  margin-bottom: 8px;
+  letter-spacing: -.055em;
+}
+
+.entry-is-home .pension-welcome h1 em {
+  font-weight: 400;
+  color: #fff;
+  font-style: normal;
+}
+
+.pension-welcome-description {
+  max-width: 530px;
+  color: #fff;
+  font-size: clamp(16px, 1.3vw, 20px);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.pension-welcome-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 32px;
+  flex-wrap: wrap;
+}
+
+.pension-btn-gold {
+  background: #d79b2b;
+  color: #fff;
+  border: none;
+  font-weight: 700;
+  font-size: 15px;
+  min-width: 192px;
+  min-height: 59px;
+  padding: 15px 32px;
+  border-radius: 999px;
+  cursor: pointer;
+  box-shadow: 0 4px 18px rgba(223, 162, 57, 0.3);
+  transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s;
+}
+
+.pension-btn-gold:hover {
+  transform: translateY(-2px);
+  background: #ebb450;
+  box-shadow: 0 8px 26px rgba(223, 162, 57, 0.45);
+}
+
+.pension-btn-outline {
+  background: transparent;
+  color: #ffffff;
+  border: 1.5px solid rgba(255, 255, 255, 0.85);
+  font-weight: 600;
+  font-size: 15px;
+  min-width: 192px;
+  min-height: 59px;
+  padding: 15px 32px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s, transform 0.2s;
+}
+
+.pension-btn-outline:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: #ffffff;
+  transform: translateY(-2px);
+}
+
+.pension-welcome-circle {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: entry-reveal 0.9s 0.1s both;
+}
+
+.pension-circle-frame {
+  width: min(100%, 410px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 10px solid rgba(220, 227, 199, 0.65);
+  box-shadow: none;
+  background: #08291f;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pension-circle-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+/* Solid Dark Green 5-Column Feature Bar */
+.hero-features-bar {
+  width: 100%;
+  background: #032f24;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 33px 24px;
+}
+
+.hero-features-inner {
+  max-width: 1020px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0;
+}
+
+.feature-col {
+  padding: 5px 14px;
+  border-left: 1px solid rgba(213, 180, 111, .5);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.feature-col:first-child {
+  padding-left: 14px;
+}
+
+.feature-col.feature-col-last {
+  border-right: none;
+  padding-right: 0;
+}
+
+.feature-col-title {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: clamp(16px, 1.25vw, 20px);
+  color: #dfa239;
+  font-weight: 500;
+  line-height: 1.25;
+}
+
+.feature-col-sub {
+  font-size: clamp(11px, 0.85vw, 13px);
+  color: #b7cbbe;
+  line-height: 1.4;
+}
+
+/* Warm Cream Section with Member Portal Card */
+.home-portal-section {
+  width: 100%;
+  background: #f6f4ee;
+  padding: clamp(55px, 6.5vw, 85px) clamp(24px, 5.2vw, 100px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.member-portal-card {
+  width: 100%;
+  max-width: 1020px;
+  min-height: 192px;
+  background: linear-gradient(105deg, rgba(6, 38, 28, 0.78) 0%, rgba(9, 46, 34, 0.7) 100%), url('/beach_bg.jpg') center/cover no-repeat;
+  border-radius: 18px;
+  padding: clamp(32px, 4vw, 42px) clamp(32px, 4.5vw, 54px);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 32px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.member-portal-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.member-portal-eyebrow {
+  font-size: 11px;
+  font-weight: 750;
+  letter-spacing: 0.14em;
+  color: #dfa239;
+  text-transform: uppercase;
+}
+
+.member-portal-title {
+  margin: 0;
+  color: #ffffff;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: clamp(26px, 3vw, 46px);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.member-portal-desc {
+  margin: 0;
+  color: #bad3c6;
+  font-size: clamp(13px, 1vw, 15px);
+  line-height: 1.55;
+}
+
+.member-portal-btn {
+  flex-shrink: 0;
+  background: #d79b2b;
+  color: #fff;
+  border: none;
+  font-weight: 700;
+  font-size: 15px;
+  min-width: 157px;
+  min-height: 54px;
+  padding: 13px 36px;
+  border-radius: 999px;
+  cursor: pointer;
+  box-shadow: 0 4px 18px rgba(223, 162, 57, 0.3);
+  transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s;
+}
+
+.member-portal-btn:hover {
+  transform: translateY(-2px);
+  background: #ebb450;
+  box-shadow: 0 8px 26px rgba(223, 162, 57, 0.45);
+}
+
+/* Clean White Bottom Footer */
+.home-clean-footer {
+  width: 100%;
+  background: #ffffff;
+  padding: 24px clamp(24px, 5.2vw, 100px);
+  border-top: 1px solid #ebece6;
+}
+
+.home-clean-footer p {
+  max-width: 1400px;
+  margin: 0 auto;
+  font-size: 12px;
+  color: #8c9790;
+  letter-spacing: 0.02em;
+}
+
+/* Schemes Dialog Styles */
+.entry-schemes-dialog { width: min(960px, calc(100% - 36px)); max-height: 85svh; padding: clamp(20px, 3vw, 38px); border: 1px solid #d4ddcc; border-radius: 22px; color: #173e32; background: #f6f5ee; box-shadow: 0 30px 100px #031c2470; }
+.entry-schemes-dialog::backdrop { background: #041d18b3; backdrop-filter: blur(6px); }
+.entry-schemes-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; margin-bottom: 25px; }
+.entry-schemes-heading .entry-eyebrow { margin: 0 0 8px; }
+.entry-schemes-heading h2 { font: 400 clamp(25px, 3vw, 36px)/1.2 var(--font-display), Georgia, serif; margin: 0; letter-spacing: -.025em; }
+.entry-schemes-close { width: 36px; height: 36px; flex-shrink: 0; display: grid; place-items: center; padding: 0; border: 1px solid #c7d0bf; border-radius: 50%; background: #edf0e4; color: #173e32; font-size: 24px; cursor: pointer; }
+.entry-schemes-close:hover { background: #dce6d1; }
+.entry-schemes-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: 16px; }
+.entry-schemes-list article { padding: 24px; background: #fffef9; border: 1px solid #d2dccb; border-radius: 14px; display: flex; align-items: flex-start; flex-direction: column; }
+.entry-scheme-duration { font-size: 11px; color: #728459; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; }
+.entry-schemes-list h3 { margin: 16px 0 10px; font-size: 18px; }
+.entry-schemes-list p { font-size: 12px; color: #6b7864; line-height: 1.7; }
+.entry-scheme-price { margin: auto 0 20px; padding-top: 15px; }
+.entry-scheme-price strong { font-size: 23px; }
+.entry-scheme-price > span { font-size: 11px; color: #6b7864; }
+.entry-schemes-list .entry-primary { width: 100%; padding-inline: 18px; border-radius: 10px; }
+.entry-schemes-state { color: #5d715c; font-size: 14px; padding-block: 16px; }
+
+/* Keep every navigation action available on smaller screens. */
+@media (max-width: 1100px) {
+  .entry-is-home .entry-header { padding: 25px 30px; }
+  .home-nav { gap: 20px; }
+  .home-nav button { font-size: 14px; }
+  .pension-welcome { gap: 30px; }
+  .pension-hero-wrap { padding-inline: 40px; }
+  .hero-features-inner { grid-template-columns: repeat(5, 1fr); }
+  .feature-col { padding-inline: 12px; }
+  .member-portal-card { padding: 35px; }
+}
+@media (max-width: 760px) {
+  .entry-is-home .entry-header { padding: 20px 24px; flex-wrap: wrap; gap: 18px; }
+  .entry-is-home .entry-brand strong { font-size: 30px; }
+  .home-nav { display: flex; width: 100%; margin: 0; gap: 22px; overflow-x: auto; }
+  .home-nav button { white-space: nowrap; font-size: 12px; }
+  .pension-hero-wrap { padding: 180px 24px 55px; }
+  .pension-welcome { grid-template-columns: 1fr; text-align: center; gap: 40px; }
+  .entry-is-home .pension-welcome h1 { font-size: 36px; }
+  .pension-welcome h1 > span:first-child { font-size: clamp(56px, 12vw, 80px); }
+  .pension-welcome-description { margin-inline: auto; }
+  .pension-welcome-actions { justify-content: center; gap: 12px; }
+  .pension-btn-gold, .pension-btn-outline { min-width: 145px; min-height: 52px; padding-inline: 22px; }
+  .pension-circle-frame { width: 290px; border-width: 8px; }
+  .hero-features-inner { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 26px 12px; }
+  .hero-features-bar { padding: 30px 24px; }
+  .home-portal-section { padding: 45px 24px; }
+  .member-portal-card { flex-direction: column; text-align: center; padding: 32px 24px; gap: 24px; }
+  .member-portal-btn { width: 100%; max-width: 280px; }
+  .member-portal-title { font-size: 32px; }
+  .home-clean-footer { padding: 24px; }
+}

@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config({ path: require('node:path').join(__dirname, '.env') });
 
 const express = require('express');
 const cors = require('cors');
@@ -6,8 +6,8 @@ const db = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
 const applicationRoutes = require('./routes/applicationRoutes');
 const adminRoutes = require('./routes/adminRoutes');
-const notificationRoutes = require('./routes/notificationRoutes');
 const documentRoutes = require('./routes/documentRoutes');
+const { startReviewEmailWorker } = require('./services/reviewEmail');
 
 if (!process.env.JWT_SECRET) throw new Error('JWT_SECRET must be set in backend/.env');
 
@@ -32,7 +32,7 @@ app.get('/api/test-db', async (req, res, next) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/applications', applicationRoutes);
 app.use('/api/admin', adminRoutes);
-app.use('/api/notifications', notificationRoutes);
+app.use('/api/officer', require('./routes/officerRoutes'));
 app.use('/api/documents', documentRoutes);
 app.use((req, res) => res.status(404).json({ message: 'Route not found' }));
 app.use((error, req, res, next) => {
@@ -44,3 +44,4 @@ app.use((error, req, res, next) => {
 
 const port = Number(process.env.PORT || 5000);
 app.listen(port, () => console.log(`Surekuma API running at http://localhost:${port}`));
+startReviewEmailWorker();
