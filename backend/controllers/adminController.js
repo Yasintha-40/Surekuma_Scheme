@@ -36,9 +36,7 @@ const getDetails = async (req, res, next) => {
     const [beneficiaries] = await db.execute('SELECT * FROM beneficiaries WHERE application_id = ?', [application.id]);
     const [documents] = await db.execute('SELECT * FROM documents WHERE application_id = ?', [application.id]);
     const [reviews] = await db.execute(`SELECT r.*, u.email AS admin_name FROM application_reviews r JOIN users u ON u.id=r.admin_id WHERE r.application_id=? ORDER BY r.reviewed_at DESC`, [application.id]);
-    const [reviewOfficers] = await db.execute(`SELECT o.* FROM review_officer_details o
-      JOIN application_reviews r ON r.id = o.review_id WHERE r.application_id = ?`, [application.id]);
-    res.json({ application, profile, employment, socialSecurity, selection, family, beneficiaries, documents, reviews, reviewOfficers });
+    res.json({ application, profile, employment, socialSecurity, selection, family, beneficiaries, documents, reviews });
   } catch (error) { next(error); }
 };
 
@@ -49,11 +47,6 @@ const review = async (req, res, next) => {
     const { action, comment = '' } = req.body;
     if (!['approved', 'rejected', 'correction_required'].includes(action)) return res.status(400).json({ message: 'A valid review action is required' });
     if (typeof comment !== 'string' || !comment.trim()) return res.status(400).json({ message: 'Please enter a response comment for the applicant' });
-    const officerFields = ['recommending_officer_name', 'recommending_designation', 'approving_designation'];
-    if (officerFields.some(key => req.body[key] !== undefined && (typeof req.body[key] !== 'string' || req.body[key].trim().length > 200))) {
-      return res.status(400).json({ message: 'Officer names and designations must be text of 200 characters or fewer.' });
-    }
-    const officerValues = officerFields.map(key => req.body[key]?.trim() || null);
     await connection.beginTransaction();
     const [[application]] = await connection.execute('SELECT * FROM applications WHERE id = ? FOR UPDATE', [req.params.id]);
     if (!application) {
@@ -67,12 +60,6 @@ const review = async (req, res, next) => {
     const [[account]] = await connection.execute(`SELECT u.email, p.contact_number
       FROM users u LEFT JOIN applicant_profiles p ON p.application_id = ? WHERE u.id = ?`, [application.id, application.user_id]);
     const [savedReview] = await connection.execute('INSERT INTO application_reviews (application_id, admin_id, action, comment) VALUES (?, ?, ?, ?)', [application.id, req.user.id, action, comment.trim()]);
-    if (officerValues.some(Boolean) || req.file) {
-      const signature = req.file ? `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}` : null;
-      await connection.execute(`INSERT INTO review_officer_details
-        (review_id, recommending_officer_name, recommending_designation, approving_designation, signature_image)
-        VALUES (?, ?, ?, ?, ?)`, [savedReview.insertId, ...officerValues, signature]);
-    }
     await connection.execute('UPDATE applications SET status = ? WHERE id = ?', [action, application.id]);
     const subject = action === 'approved' ? 'Application approved' : action === 'rejected' ? 'Application rejected' : 'Correction required';
     const message = action === 'approved' ? `Your application ${application.application_no} has been approved.` : action === 'rejected' ? `Your application ${application.application_no} was not approved. ${comment.trim()}` : `Please update your application ${application.application_no}. ${comment.trim()}`;
@@ -104,7 +91,6 @@ const resources = async (req, res, next) => {
       memberships: `SELECT m.*, a.application_no, p.full_name FROM memberships m JOIN applications a ON a.id=m.application_id LEFT JOIN applicant_profiles p ON p.application_id=a.id ORDER BY m.created_at DESC`,
       users: 'SELECT id, email, role, status, created_at FROM users ORDER BY created_at DESC',
       schemes: 'SELECT * FROM pension_schemes ORDER BY monthly_contribution',
-      recommendations: `SELECT r.*, a.application_no, p.full_name FROM sltda_recommendations r JOIN applications a ON a.id=r.application_id LEFT JOIN applicant_profiles p ON p.application_id=a.id ORDER BY r.recommendation_date DESC`,
     };
     if (!queries[type]) return res.status(404).json({ message: 'Resource not found' });
     const [rows] = await db.query(queries[type]);

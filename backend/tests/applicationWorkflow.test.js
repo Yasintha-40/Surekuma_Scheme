@@ -183,20 +183,3 @@ test('email template escapes administrator comments and includes clear rejection
   assert.doesNotMatch(email.html, /<script>/);
   assert.match(email.html, /&lt;script&gt;/);
 });
-
-test('officer details and signature are saved with the review transaction', async () => {
-  const image = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]);
-  const handler = (req, res, next) => review({ ...req, file: { mimetype: 'image/png', buffer: image } }, res, next);
-  const result = await invoke(handler, { action: 'approved', comment: 'Approved', recommending_officer_name: ' Officer A ', recommending_designation: ' Director ', approving_designation: ' Chairman ' });
-  assert.equal(result.error, undefined);
-  const index = calls.findIndex(([sql]) => sql.includes('INSERT INTO review_officer_details'));
-  assert.ok(index > -1);
-  assert.deepEqual(calls[index][1], [77, 'Officer A', 'Director', 'Chairman', `data:image/png;base64,${image.toString('base64')}`]);
-  assert.ok(index < calls.findIndex(([sql]) => sql === 'COMMIT'));
-});
-
-test('oversized officer designation is rejected before writing a review', async () => {
-  const result = await invoke(review, { action: 'approved', comment: 'Approved', approving_designation: 'x'.repeat(201) });
-  assert.equal(result.status, 400);
-  assert.equal(calls.some(([sql]) => sql.includes('INSERT INTO application_reviews')), false);
-});

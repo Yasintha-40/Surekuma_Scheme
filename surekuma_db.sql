@@ -190,29 +190,6 @@ CREATE TABLE `pension_schemes` (
 
 -- --------------------------------------------------------
 
---
--- Table structure for table `sltda_recommendations`
---
-
-CREATE TABLE `sltda_recommendations` (
-  `id` int(11) NOT NULL,
-  `application_id` int(11) NOT NULL,
-  `officer_id` int(11) DEFAULT NULL,
-  `is_recommended` tinyint(1) DEFAULT 0,
-  `sltda_contribution_percent` decimal(5,2) DEFAULT 40.00,
-  `applicant_contribution_percent` decimal(5,2) DEFAULT 60.00,
-  `sltda_contribution_amount` decimal(10,2) DEFAULT NULL,
-  `applicant_contribution_amount` decimal(10,2) DEFAULT NULL,
-  `payment_start_month` date DEFAULT NULL,
-  `number_of_months` int(11) DEFAULT NULL,
-  `payment_end_month` date DEFAULT NULL,
-  `pension_start_month` date DEFAULT NULL,
-  `officer_name` varchar(200) DEFAULT NULL,
-  `officer_designation` varchar(150) DEFAULT NULL,
-  `officer_signature_path` varchar(500) DEFAULT NULL,
-  `recommendation_date` date DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
 -- --------------------------------------------------------
 
 --
@@ -324,14 +301,6 @@ ALTER TABLE `pension_schemes`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indexes for table `sltda_recommendations`
---
-ALTER TABLE `sltda_recommendations`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `application_id` (`application_id`),
-  ADD KEY `fk_recommendation_officer` (`officer_id`);
-
---
 -- Indexes for table `social_security_entitlements`
 --
 ALTER TABLE `social_security_entitlements`
@@ -403,12 +372,6 @@ ALTER TABLE `memberships`
 -- AUTO_INCREMENT for table `pension_schemes`
 --
 ALTER TABLE `pension_schemes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `sltda_recommendations`
---
-ALTER TABLE `sltda_recommendations`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
@@ -488,15 +451,6 @@ ALTER TABLE `memberships`
 
 --
 --
--- Constraints for table `sltda_recommendations`
---
-ALTER TABLE `sltda_recommendations`
-  ADD CONSTRAINT `fk_recommendation_application` FOREIGN KEY (`application_id`) REFERENCES `applications` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `fk_recommendation_officer` FOREIGN KEY (`officer_id`) REFERENCES `users` (`id`) ON UPDATE CASCADE,
-  ADD CONSTRAINT `sltda_recommendations_ibfk_1` FOREIGN KEY (`application_id`) REFERENCES `applications` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `sltda_recommendations_ibfk_2` FOREIGN KEY (`officer_id`) REFERENCES `users` (`id`);
-
---
 -- Constraints for table `social_security_entitlements`
 --
 ALTER TABLE `social_security_entitlements`
@@ -546,62 +500,9 @@ CREATE TABLE IF NOT EXISTS `employment_categories` (
   CONSTRAINT `fk_employment_categories_tourism_category` FOREIGN KEY (`tourism_category_id`) REFERENCES `tourism_categories` (`id`) ON UPDATE CASCADE ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-CREATE TABLE IF NOT EXISTS `social_security_types` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `security_name` varchar(150) NOT NULL,
-  `description` varchar(500) DEFAULT NULL,
-  `is_active` tinyint(1) NOT NULL DEFAULT 1,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `social_security_types_name_unique` (`security_name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
-CREATE TABLE IF NOT EXISTS `application_social_security` (
-  `application_id` int(11) NOT NULL,
-  `social_security_type_id` int(11) NOT NULL,
-  `is_entitled` tinyint(1) NOT NULL DEFAULT 0,
-  `remarks` varchar(500) DEFAULT NULL,
-  PRIMARY KEY (`application_id`, `social_security_type_id`),
-  CONSTRAINT `fk_application_social_security_application` FOREIGN KEY (`application_id`) REFERENCES `applications` (`id`) ON UPDATE CASCADE ON DELETE CASCADE,
-  CONSTRAINT `fk_application_social_security_type` FOREIGN KEY (`social_security_type_id`) REFERENCES `social_security_types` (`id`) ON UPDATE CASCADE ON DELETE RESTRICT
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
-CREATE TABLE IF NOT EXISTS `application_status_history` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `application_id` int(11) NOT NULL,
-  `old_status` varchar(50) DEFAULT NULL,
-  `new_status` varchar(50) NOT NULL,
-  `changed_by` int(11) DEFAULT NULL,
-  `remarks` varchar(1000) DEFAULT NULL,
-  `changed_at` datetime NOT NULL DEFAULT current_timestamp(),
-  PRIMARY KEY (`id`),
-  KEY `application_status_history_application_idx` (`application_id`),
-  CONSTRAINT `fk_application_status_history_application` FOREIGN KEY (`application_id`) REFERENCES `applications` (`id`) ON UPDATE CASCADE ON DELETE CASCADE,
-  CONSTRAINT `fk_application_status_history_user` FOREIGN KEY (`changed_by`) REFERENCES `users` (`id`) ON UPDATE CASCADE ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
-CREATE TABLE IF NOT EXISTS `sssb_recommendations` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `application_id` int(11) NOT NULL,
-  `reviewed_by` int(11) NOT NULL,
-  `approved_by` int(11) DEFAULT NULL,
-  `decision` enum('pending','recommended','approved','rejected','returned') NOT NULL DEFAULT 'pending',
-  `remarks` varchar(1000) DEFAULT NULL,
-  `recommendation_date` date DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `sssb_recommendations_application_unique` (`application_id`),
-  CONSTRAINT `fk_sssb_recommendations_application` FOREIGN KEY (`application_id`) REFERENCES `applications` (`id`) ON UPDATE CASCADE ON DELETE CASCADE,
-  CONSTRAINT `fk_sssb_recommendations_reviewer` FOREIGN KEY (`reviewed_by`) REFERENCES `users` (`id`) ON UPDATE CASCADE ON DELETE RESTRICT,
-  CONSTRAINT `fk_sssb_recommendations_approver` FOREIGN KEY (`approved_by`) REFERENCES `users` (`id`) ON UPDATE CASCADE ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
 INSERT IGNORE INTO `tourism_categories` (`category_name`) VALUES
   ('Homestay'), ('Bungalow'), ('Tourist Hotels'), ('Rented Apartment'),
   ('Tourist Guide Lecturers'), ('Travel Agents'), ('Tourist Driver'), ('Other');
-
-INSERT IGNORE INTO `social_security_types` (`security_name`) VALUES
-  ('EPF'), ('ETF'), ('Government Pension'), ('Other Social Security Scheme');
 
 -- --------------------------------------------------------
 
@@ -624,17 +525,6 @@ CREATE TABLE IF NOT EXISTS applicant_otp_challenges (
 
 
 
-
--- --------------------------------------------------------
--- Officer details are attached to each review, preserving previous decisions.
-CREATE TABLE IF NOT EXISTS review_officer_details (
-  review_id INT NOT NULL PRIMARY KEY,
-  recommending_officer_name VARCHAR(200) DEFAULT NULL,
-  recommending_designation VARCHAR(200) DEFAULT NULL,
-  approving_designation VARCHAR(200) DEFAULT NULL,
-  signature_image MEDIUMTEXT DEFAULT NULL,
-  CONSTRAINT review_officer_review_fk FOREIGN KEY (review_id) REFERENCES application_reviews(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Consolidated schema: insurance officer role and account
 -- SLTDA officers retain role 'admin'. Insurance company officers use 'insurance_officer'.

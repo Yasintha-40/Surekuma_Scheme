@@ -124,7 +124,10 @@ function LoginForm({ onLogin }) {
       if (requestError.response?.status === 429) {
         setResendCooldown(requestError.response.data.retryAfter || 60);
       }
-      setError(requestError.response?.data?.message || 'Unable to send verification code. Please try again.');
+      const serverMessage = requestError.response?.data?.message;
+      setError(serverMessage || (requestError.request
+        ? 'Cannot reach the Surekuma server. Start the backend and try again.'
+        : 'Unable to send verification code. Please try again.'));
     } finally {
       submitting.current = false;
       setLoading(false);

@@ -5,7 +5,7 @@ router.use(authenticate, authorize('admin'));
 router.get('/dashboard', controller.dashboard);
 router.get('/applications', controller.listApplications);
 router.get('/applications/:id', controller.getDetails);
-router.post('/applications/:id/review', require('../middleware/reviewUpload'), controller.review);
+router.post('/applications/:id/review', controller.review);
 router.get('/resources/:type', controller.resources);
 router.get('/reports', controller.report);
 module.exports = router;
